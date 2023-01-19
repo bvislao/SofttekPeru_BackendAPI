@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using SofttekPeru.API.DTOS;
 using SofttekPeru.API.Repository.Interfaces;
 using SofttekPeru.Model;
 using System.IdentityModel.Tokens.Jwt;
@@ -32,15 +33,22 @@ namespace SofttekPeru.API.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult LoginAsesores(int Usuario, string Pwd)
+        public ActionResult LoginAsesores(UserRequest user)
         {
             var objResult = new object();
             try
             {
-                var searchUsuario = _asesorRepository.AccesoAsesor(Usuario, Pwd);
+                var searchUsuario = _asesorRepository.AccesoAsesor(user.Usuario, user.Pwd);
                 if (searchUsuario == null)
                 {
-                    return NotFound(objResult);
+                    objResult = new
+                    {
+                        status=false,
+                        codigoAsesor = string.Empty,
+                        nombreAsesor = string.Empty,
+                        token = string.Empty
+                    };
+                    return Ok(objResult);
                 }
                 else
                 {
@@ -68,6 +76,7 @@ namespace SofttekPeru.API.Controllers
                     var stringToken = tokenHandler.WriteToken(token);
                     objResult = new
                     {
+                        status = true,
                         codigoAsesor = searchUsuario.CodigoAsesor,
                         nombreAsesor = searchUsuario.NombreAsesor,
                         token = stringToken
@@ -81,6 +90,6 @@ namespace SofttekPeru.API.Controllers
             }
             return Ok(objResult);
 
-        }
+            }
     }
 }
